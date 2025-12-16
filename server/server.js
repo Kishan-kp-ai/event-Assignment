@@ -11,19 +11,30 @@ const rsvpRoutes = require("./routes/rsvp");
 
 const app = express();
 
-/* -------------------- MIDDLEWARE -------------------- */
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-}));
+/* -------------------- CORS (FIXED FOR VERCEL + PREFLIGHT) -------------------- */
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://event-assignment.vercel.app"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
+/* ✅ THIS LINE FIXES THE 404 PREFLIGHT ERROR */
+app.options("*", cors());
+
+/* -------------------- BODY PARSER -------------------- */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 /* -------------------- DATABASE -------------------- */
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
-  .catch(err => console.error("MongoDB connection error:", err));
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 /* -------------------- ROUTES -------------------- */
 app.use("/api/auth", authRoutes);
@@ -34,7 +45,7 @@ app.use("/api/rsvp", rsvpRoutes);
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "Event Platform API is running 🚀"
+    message: "Event Platform API is running 🚀",
   });
 });
 
@@ -43,7 +54,7 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
     success: false,
-    message: err.message || "Server Error"
+    message: err.message || "Server Error",
   });
 });
 
