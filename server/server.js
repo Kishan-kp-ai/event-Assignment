@@ -11,25 +11,13 @@ const rsvpRoutes = require("./routes/rsvp");
 
 const app = express();
 
-/* ==================== CORS (HARD FIX) ==================== */
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://event-assignment.vercel.app");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
-  );
-
-  // ✅ Handle preflight requests
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-
-  next();
-});
+/* ==================== CORS ==================== */
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 /* ==================== BODY PARSER ==================== */
 app.use(express.json());
@@ -37,7 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 
 /* ==================== DATABASE ==================== */
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGODB_URI || process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 

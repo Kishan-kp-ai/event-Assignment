@@ -27,6 +27,14 @@ router.post('/:eventId/join', protect, async (req, res) => {
       });
     }
 
+    if (event.creator.toString() === req.user.id) {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        message: 'You cannot RSVP to your own event'
+      });
+    }
+
     const alreadyRsvped = event.attendees.some(
       attendee => attendee.toString() === req.user.id
     );

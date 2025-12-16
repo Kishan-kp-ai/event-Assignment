@@ -44,8 +44,8 @@ userSchema.methods.matchPassword = async function(enteredPassword) {
 };
 
 userSchema.methods.getSignedJwtToken = function() {
-  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET || 'fallback_secret_key', {
+    expiresIn: process.env.JWT_EXPIRE || '7d'
   });
 };
 

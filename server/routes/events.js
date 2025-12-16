@@ -75,7 +75,10 @@ router.get('/my-events', protect, async (req, res) => {
 
 router.get('/my-rsvps', protect, async (req, res) => {
   try {
-    const events = await Event.find({ attendees: req.user.id })
+    const events = await Event.find({ 
+      attendees: req.user.id,
+      creator: { $ne: req.user.id }
+    })
       .populate('creator', 'name email')
       .populate('attendees', 'name email')
       .sort({ dateTime: 1 });
