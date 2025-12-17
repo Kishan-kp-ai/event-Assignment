@@ -191,6 +191,40 @@ The RSVP system uses MongoDB transactions with atomic operations to prevent over
 | SmartDashboard | `/dashboard` | User dashboard with stats (protected) |
 | My RSVPs | `/my-rsvps` | Events user is attending (protected) |
 
+## Deployment
+
+### Deploy Backend to Render (Free)
+
+1. Go to [render.com](https://render.com) and sign up with GitHub
+2. Click **New** → **Web Service**
+3. Connect your GitHub repo and select the `server` folder
+4. Configure:
+   - **Build Command**: `npm install`
+   - **Start Command**: `node server.js`
+5. Add Environment Variables:
+   - `MONGODB_URI` - Your MongoDB Atlas connection string
+   - `JWT_SECRET` - A random secret string
+   - `JWT_EXPIRE` - `7d`
+   - `CLIENT_URL` - Your Vercel frontend URL (add after deploying frontend)
+   - `CLOUDINARY_CLOUD_NAME` - From Cloudinary dashboard
+   - `CLOUDINARY_API_KEY` - From Cloudinary dashboard
+   - `CLOUDINARY_API_SECRET` - From Cloudinary dashboard
+6. Click **Create Web Service**
+
+### Deploy Frontend to Vercel (Free)
+
+1. Go to [vercel.com](https://vercel.com) and sign up with GitHub
+2. Click **New Project** → Import your GitHub repo
+3. Set **Root Directory** to `client`
+4. Add Environment Variable:
+   - `REACT_APP_API_URL` - Your Render backend URL (e.g., `https://your-app.onrender.com/api`)
+5. Click **Deploy**
+
+### Post-Deployment
+
+1. Update `CLIENT_URL` in Render with your Vercel URL
+2. Update CORS if needed
+
 ## License
 
 MIT
