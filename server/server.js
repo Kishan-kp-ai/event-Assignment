@@ -11,13 +11,32 @@ const rsvpRoutes = require("./routes/rsvp");
 
 const app = express();
 
-/* ==================== CORS ==================== */
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+/* ==================== CORS (FINAL FIX) ==================== */
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://event-assignment-frontend-p06m.onrender.com"
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow server-to-server / Postman
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// Handle preflight requests
+app.options("*", cors());
 
 /* ==================== BODY PARSER ==================== */
 app.use(express.json());
@@ -25,16 +44,19 @@ app.use(express.urlencoded({ extended: true }));
 
 /* ==================== DATABASE ==================== */
 mongoose
-  .connect(process.env.MONGODB_URI || process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+    process.exit(1);
+  });
 
 /* ==================== ROUTES ==================== */
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/rsvp", rsvpRoutes);
 
-/* ==================== HEALTH ==================== */
+/* ==================== HEALTH CHECK ==================== */
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
@@ -42,7 +64,7 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-/* ==================== ERROR HANDLER ==================== */
+/* ==================== GLOBAL ERROR HANDLER ==================== */
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
